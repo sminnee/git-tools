@@ -1,0 +1,26 @@
+#!/usr/bin/env php
+<?php
+if(empty($_SERVER['argv'][1])) {
+	echo "Usage:
+
+$0 <bin-dir>
+
+Eg: sudo $0 /usr/local/bin
+
+This will symlink the binaries from this project into that directory.
+We use symlinks to make it easier to get updates to this package from github.
+";
+	exit(1);
+}
+
+$dest = $_SERVER['argv'][1];
+if(substr($dest,-1) == '/') $dest = substr($dest,0,-1);
+
+$src = realpath(dirname(__FILE__));
+
+foreach(array('git-feature', 'git-pull-all') as $bin) {
+	if(!file_exists("$dest/$bin")) {
+		echo "Linking $src/$bin to $dest/$bin\n";
+		symlink("$src/$bin", "$dest/$bin");
+	}
+}

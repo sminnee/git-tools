@@ -1,0 +1,57 @@
+#!/usr/bin/env php
+<?php
+                      
+$action = isset($_SERVER['argv'][1]) ? strtolower($_SERVER['argv'][1]) : 'help';
+
+switch($action) {
+case "list-unmerged":
+	$remoteBranches = get_branches(false, true);
+
+	foreach($remoteBranches as $remoteBranch) {
+		if($remoteBranch == 'origin/master') continue;
+		if(trim(`git log --oneline origin/master..$remoteBranch`) == "") continue;
+		
+		echo "$remoteBranch\n";
+	}
+	break;
+
+case "help":
+default:
+	echo "Usage:
+
+git feature list-unmerged: List all unmerged feature branches
+git feature help: This help
+
+";
+	break;
+
+
+}
+
+function echo_call($cmd) {
+	echo "> $cmd\n";
+	passthru($cmd);
+}
+
+function sha_for($ref) {
+	return trim(`git rev-parse $ref`);
+}
+
+function get_branches($local = true, $remote = false) {
+	if($local) {
+		if($remote) $arg = "-a";
+		else $arg = "";
+	} else {
+		if($remote) $arg = "-r";
+		else return array();
+	}
+
+	$branches = explode("\n", trim(`git branch $arg`));
+	foreach($branches as $i => $branch) {
+		if($branch[0] == "*") $branch = substr($branch,1);
+		$branches[$i] = trim($branch);
+	}
+
+	return $branches;
+}
+

@@ -1,0 +1,33 @@
+#!/usr/bin/env php
+<?php
+
+echo_call("git fetch");
+
+$branches = explode("\n", trim(`git branch`));
+
+foreach($branches as $branch) {
+	if($branch[0] == "*") {
+		$branch = trim(substr($branch,1));
+		$ref = trim(`git config --get branch.$branch.merge`);
+
+		if(sha_for($branch) != sha_for($ref)) {
+			echo_call("git pull");
+		}
+	} else {
+		$branch = trim($branch);
+		$ref = trim(`git config --get branch.$branch.merge`);
+
+		if(sha_for($branch) != sha_for($ref)) {
+			echo_call("git branch -f $branch $ref");
+		}
+	}
+}
+
+function echo_call($cmd) {
+	echo "> $cmd\n";
+	passthru($cmd);
+}
+
+function sha_for($ref) {
+	return trim(`git rev-parse $ref`);
+}
