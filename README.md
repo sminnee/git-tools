@@ -4,6 +4,7 @@ This repository is a collection of extensions to git that I find useful.  You're
 
  * `git pull-all`: Pulls all branches from their remotes, whether you have them currently checked out or now.
  * `git feature list-unmerged`: List remote branches that haven't yet been merged back to origin/master.
+ * `git feature list-merged`: List remote branches that have been fully merged back to origin/master.
 
 ## Installation
 

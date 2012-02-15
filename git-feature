@@ -6,13 +6,37 @@ $action = isset($_SERVER['argv'][1]) ? strtolower($_SERVER['argv'][1]) : 'help';
 switch($action) {
 case "list-unmerged":
 	$remoteBranches = get_branches(false, true);
+	sort($remoteBranches);
 
+	$prevRemote = null;
 	foreach($remoteBranches as $remoteBranch) {
 		if($remoteBranch == 'origin/master') continue;
 		if(trim(`git log --oneline origin/master..$remoteBranch`) == "") continue;
 		
-		echo "$remoteBranch\n";
+		list($remote, $branch) = explode('/', $remoteBranch, 2);
+		if($prevRemote != $remote) echo "\nRemote '$remote':\n";
+		echo "$branch\n";
+		
+		$prevRemote = $remote;
 	}
+	echo "\n";
+	break;
+
+case "list-merged":
+	$remoteBranches = get_branches(false, true);
+
+	$prevRemote = null;
+	foreach($remoteBranches as $remoteBranch) {
+		if($remoteBranch == 'origin/master') continue;
+		if(trim(`git log --oneline origin/master..$remoteBranch`) != "") continue;
+
+		list($remote, $branch) = explode('/', $remoteBranch, 2);
+		if($prevRemote != $remote) echo "\nRemote '$remote':\n\n";
+		echo "$branch\n";
+		
+		$prevRemote = $remote;
+	}
+	echo "\n";
 	break;
 
 case "help":
@@ -20,7 +44,11 @@ default:
 	echo "Usage:
 
 git feature list-unmerged: List all unmerged feature branches
-git feature help: This help
+git feature list-merged:   List all merged feature branches
+git feature help:          This help text
+
+Note that, right now, any remote branch is considered a feature branch, and it checks that it has been merged 
+to origin/master.  If your primary remote isn't called origin, this script won't work.
 
 ";
 	break;
